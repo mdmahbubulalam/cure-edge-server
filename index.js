@@ -54,7 +54,7 @@ async function run() {
   try {
     await client.connect();
     console.log("database connected");
-    const cureEdgeDB = client.db("cureEdgeDB");
+    const cureEdgeDB = client.db(`${process.env.DB_NAME}`);
     const doctorCollection = cureEdgeDB.collection("doctors");
     const serviceCollection = cureEdgeDB.collection("services");
     const hospitalCollection = cureEdgeDB.collection("hospitals");
