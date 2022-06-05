@@ -12,16 +12,17 @@ const port = process.env.PORT || 5000;
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    "type": process.env.FIREBASE_TYPE,
-    "project_id": process.env.FIREBASE_PROJECT_ID,
-    "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID,
-    "private_key": process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    "client_email": process.env.FIREBASE_CLIENT_EMAIL,
-    "client_id": process.env.FIREBASE_CLIENT_ID,
-    "auth_uri": process.env.FIREBASE_AUTH_URI,
-    "token_uri": process.env.FIREBASE_TOKEN_URI,
-    "auth_provider_x509_cert_url": process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-    "client_x509_cert_url": process.env.FIREBASE_CLIENT_X509_CERT_URL
+    type: process.env.FIREBASE_TYPE,
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: process.env.FIREBASE_AUTH_URI,
+    token_uri: process.env.FIREBASE_TOKEN_URI,
+    auth_provider_x509_cert_url:
+      process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+    client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
   }),
 });
 
@@ -88,7 +89,6 @@ async function run() {
     app.put("/doctors/:doctorId", async (req, res) => {
       const id = req.params.doctorId;
       const updatedDoctorsInfo = req.body;
-      console.log(updatedDoctorsInfo);
       const filter = { _id: ObjectId(id) };
       const updateDoc = {
         $set: {
@@ -228,21 +228,19 @@ async function run() {
         });
         if (requesterAccount.role === "Admin") {
           reviewCollection
-          .findOneAndUpdate(
-            { _id: ObjectId(id) },
-            {
-              $set: { status },
-            }
-          )
-          .then((result) => {
-            res.send(result.modifiedCount > 0);
-          });
+            .findOneAndUpdate(
+              { _id: ObjectId(id) },
+              {
+                $set: { status },
+              }
+            )
+            .then((result) => {
+              res.send(result.modifiedCount > 0);
+            });
         }
       } else {
         res.status(401).json({ message: "Unauthorized user" });
       }
-      
-      
     });
 
     //delete single review
@@ -288,6 +286,7 @@ async function run() {
     //get appoinment by user
     app.get("/appoinmentByUser", verifyToken, async (req, res) => {
       const email = req.decodedUserEmail;
+      //const email = req.params.email;
       if (req.decodedUserEmail === email) {
         const query = { email: email };
         const cursor = appoinmentCollection.find(query);
@@ -354,10 +353,18 @@ async function run() {
       const query = { email: email };
       const user = await userCollection.findOne(query);
       let isAdmin = false;
-      if (user?.role === 'Admin') {
+      if (user?.role === "Admin") {
         isAdmin = true;
       }
       res.json({ admin: isAdmin });
+    });
+
+    //get single user
+    app.get("/singleUser/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      res.json(user);
     });
 
     //delete single user
